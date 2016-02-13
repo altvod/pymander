@@ -80,7 +80,7 @@ And back to the future we go!
     Traveling to date: October 10 2058
 
 
-It's worth mentioning that ``run_with_handler(context)`` is really a shortcut for ``run_with_context(StandardPrompt([context]))``.
+It's worth mentioning that ``run_with_handler(handler)`` is basically an acronym for ``run_with_context(StandardPrompt([handler]))``.
 
 ``StandardPrompt`` is a simple command context that includes the following features:
 
