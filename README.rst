@@ -52,8 +52,9 @@ Now, imagine you decide to spice things up and add some time travel functionalit
             else:
                 raise CantParseLine(line)
 
-This is where we get to the problem of combining the two handlers in a single app.
-CommandContexts are a way of combining several independent handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` CommandContext:
+This is where we get to the problem of using the two handlers in our little app.
+
+Command contexts are a way of combining several handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` command context:
 ::
 
     from pymander import StandardPrompt, run_with_context
@@ -71,3 +72,78 @@ And back to the future we go!
     2016.14.14
     >>> go to date October 10 2058
     Traveling to date: October 10 2058
+
+It's worth mentioning that ``run_with_handler(context)`` is really a shortcut for ``run_with_context(StandardPrompt([context]))``.
+
+``StandardPrompt`` is a simple command context that includes the following features:
+
+- prints the ``">>> "`` when prompting for a new command
+- writes "Invalid command: ..." when it cannot recognize a command
+- adds the ``EchoLineHandler`` and ``ExitLineHandler`` handlers, which implement the ``echo`` and ``exit`` commands familiar to everyone
+
+
+More Examples
+-------------
+
+Moving on to more complicated examples...
+
+****
+
+**Using regular expresssions (RegexLineHandler)**
+
+Example:
+::
+
+    class BerryLineHandler(RegexLineHandler):
+        class Registry(RegexLineHandler.Registry):
+            pass
+
+        @Registry.bind(r'pick a (?P<berry_kind>\w+)')
+        def pick_berry(self, berry_kind):
+            self.context.write('Picked a {0}\n'.format(berry_kind))
+
+        @Registry.bind(r'make (?P<berry_kind>\w+) jam')
+        def make_jam(self, berry_kind):
+            self.context.write('Made some {0} jam\n'.format(berry_kind))
+
+Output:
+::
+
+    >>> pick a strawberry
+    Picked a strawberry
+    >>> make blueberry jam
+    Made some blueberry jam
+
+
+****
+
+**Using argparse (ArgparseLineHandler)**
+
+Example:
+::
+
+    class GameLineHandler(ArgparseLineHandler):
+        class Registry(ArgparseLineHandler.Registry):
+            pass
+
+        @Registry.bind('play', {
+            'game': {'type': str, 'default': 'nothing'},
+            '--well': {'action': 'store_true'},
+        })
+        def play(self, game, well):
+            self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
+
+        @Registry.bind('win')
+        def win(self):
+            self.context.write('I just won!\n')
+
+
+Output:
+::
+
+    >>> play chess --well
+    I play chess very well
+    >>> play monopoly
+    I play monopoly
+    >>> win
+    I just won!
