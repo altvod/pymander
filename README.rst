@@ -158,3 +158,42 @@ Output:
     >>> win
     I just won!
 
+
+****
+
+**Combining argparse and regexes using PrebuiltCommandContext**
+
+Sometimes you might find it useful to be able to use both approaches together or be able to switch from one to another without making a mess of a whole bunch of handlers.
+
+``PrebuiltCommandContext`` allows you to use decorators to assign its own methods as either argparse or regex commands in a single (command context) class without having to define the handlers yourself:
+
+.. code-block:: python
+
+    class SaladContext(PrebuiltCommandContext, StandardPrompt):
+        class Registry(PrebuiltCommandContext.Registry):
+            pass
+
+        @Registry.bind_regex(r'(?P<do_what>eat|cook) caesar')
+        def caesar_salad(self, do_what):
+            self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
+
+        @Registry.bind_argparse('buy', {
+            'kind_of_salad': {},
+            ('--price', '-p'): {'default': None}
+        })
+        def buy_salad(self, kind_of_salad, price):
+            self.write('Buying {0} salad{1}...\n'.format(
+                kind_of_salad, ' for {0}'.format(price) if price else '')
+            )
+
+
+Example:
+
+::
+
+    >>> cook caesar
+    Cooking caesar salad...
+    >>> buy greek
+    Buying greek salad...
+    >>> buy russian --price $5
+    Buying russian salad for $5...
