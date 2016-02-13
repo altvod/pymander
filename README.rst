@@ -73,6 +73,7 @@ Command contexts are a way of combining several handlers in a single scope so th
 And back to the future we go!
 
 ::
+
     >>> date
     2016.14.14
     >>> go to date October 10 2058
