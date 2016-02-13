@@ -170,6 +170,8 @@ Sometimes you might find it useful to be able to use both approaches together or
 
 .. code-block:: python
 
+    from pymander import PrebuiltCommandContext, StandardPrompt, run_with_context
+    
     class SaladContext(PrebuiltCommandContext, StandardPrompt):
         class Registry(PrebuiltCommandContext.Registry):
             pass
