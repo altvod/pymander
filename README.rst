@@ -186,6 +186,8 @@ Sometimes you might find it useful to be able to use both approaches together or
             self.write('Buying {0} salad{1}...\n'.format(
                 kind_of_salad, ' for {0}'.format(price) if price else '')
             )
+    
+    run_with_context(SaladContext())
 
 
 Example:
