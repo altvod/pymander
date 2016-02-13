@@ -10,7 +10,8 @@ Quick Usage Example
 -------------------
 
 Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that print the current date and time respectively. Then you would do something like this:
-::
+
+.. code-block:: python
 
     import time
     from pymander import LineHandler, CantParseLine, run_with_handler
@@ -28,6 +29,7 @@ Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that p
     run_with_handler(DatetimeLineHandler())
 
 And you'll get... (just type ``exit`` to exit the loop)
+
 ::
 
     >>> date
@@ -39,7 +41,8 @@ And you'll get... (just type ``exit`` to exit the loop)
 
 
 Now, imagine you decide to spice things up and add some time travel functionality to your app. It might be a good idea to keep this separate from the code that just shows the date and time, so go ahead and create a new handler:
-::
+
+.. code-block:: python
 
     import re
 
@@ -55,7 +58,8 @@ Now, imagine you decide to spice things up and add some time travel functionalit
 This is where we get to the problem of using the two handlers in our little app.
 
 Command contexts are a way of combining several handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` command context:
-::
+
+.. code-block:: python
 
     from pymander import StandardPrompt, run_with_context
     
@@ -67,11 +71,13 @@ Command contexts are a way of combining several handlers in a single scope so th
     )
 
 And back to the future we go!
+
 ::
     >>> date
     2016.14.14
     >>> go to date October 10 2058
     Traveling to date: October 10 2058
+
 
 It's worth mentioning that ``run_with_handler(context)`` is really a shortcut for ``run_with_context(StandardPrompt([context]))``.
 
@@ -92,7 +98,8 @@ Moving on to more complicated examples...
 **Using regular expresssions (RegexLineHandler)**
 
 Example:
-::
+
+.. code-block:: python
 
     class BerryLineHandler(RegexLineHandler):
         class Registry(RegexLineHandler.Registry):
@@ -107,6 +114,7 @@ Example:
             self.context.write('Made some {0} jam\n'.format(berry_kind))
 
 Output:
+
 ::
 
     >>> pick a strawberry
@@ -120,7 +128,8 @@ Output:
 **Using argparse (ArgparseLineHandler)**
 
 Example:
-::
+
+.. code-block:: python
 
     class GameLineHandler(ArgparseLineHandler):
         class Registry(ArgparseLineHandler.Registry):
@@ -139,6 +148,7 @@ Example:
 
 
 Output:
+
 ::
 
     >>> play chess --well
@@ -147,3 +157,4 @@ Output:
     I play monopoly
     >>> win
     I just won!
+
