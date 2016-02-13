@@ -5,7 +5,7 @@ class SaladContext(PrebuiltCommandContext, StandardPrompt):
     class Registry(PrebuiltCommandContext.Registry):
         pass
 
-    @Registry.bind_regex(r'^(?P<do_what>eat|cook) caesar')
+    @Registry.bind_regex(r'(?P<do_what>eat|cook) caesar')
     def caesar_salad(self, do_what):
         self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
 
