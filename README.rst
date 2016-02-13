@@ -34,9 +34,11 @@ And you'll get... (just type ``exit`` to exit the loop)
     2016.14.14
     >>> time 
     01:00:00
+    >>> exit 
+    Bye!
 
 
-Let's imagine you decide to spice things up and add some time travel functionality to your app. It might be a good idea to keep this separate from the code that just shows the date and time, so go ahead and create a new handler:
+Now, imagine you decide to spice things up and add some time travel functionality to your app. It might be a good idea to keep this separate from the code that just shows the date and time, so go ahead and create a new handler:
 ::
 
     import re
@@ -50,4 +52,22 @@ Let's imagine you decide to spice things up and add some time travel functionali
             else:
                 raise CantParseLine(line)
 
-Now we get to the problem of combining the two handlers in a single app. This is where ``CommandContext``s come in
+This is where we get to the problem of combining the two handlers in a single app.
+CommandContexts are a way of combining several independent handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` CommandContext:
+::
+
+    from pymander import StandardPrompt, run_with_context
+    
+    run_with_context(
+        StandardPrompt([
+            DatetimeLineHandler(),
+            TimeTravelLineHandler()
+        ])
+    )
+
+And back to the future we go!
+::
+    >>> date
+    2016.14.14
+    >>> go to date October 10 2058
+    Traveling to date: October 10 2058
