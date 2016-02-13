@@ -1,4 +1,4 @@
-from commander import PrebuiltCommandContext, StandardPrompt, Commander
+from pymander import PrebuiltCommandContext, StandardPrompt, Commander
 
 
 class SaladContext(PrebuiltCommandContext, StandardPrompt):

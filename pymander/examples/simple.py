@@ -1,4 +1,4 @@
-from commander import CantParseLine, LineHandler, RegexLineHandler, ArgparseLineHandler, \
+from pymander import CantParseLine, LineHandler, RegexLineHandler, ArgparseLineHandler, \
     StandardPrompt, Commander
 
 

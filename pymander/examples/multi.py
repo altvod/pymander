@@ -1,6 +1,6 @@
 import json
 
-from commander import ArgparseLineHandler, JsonContext, StandardPrompt, Commander
+from pymander import ArgparseLineHandler, JsonContext, StandardPrompt, Commander
 
 
 class StarTrekLineHandler(ArgparseLineHandler):
