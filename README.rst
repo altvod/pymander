@@ -82,13 +82,15 @@ It's worth mentioning that ``run_with_handler(context)`` is really a shortcut fo
 - adds the ``EchoLineHandler`` and ``ExitLineHandler`` handlers, which implement the ``echo`` and ``exit`` commands familiar to everyone
 
 
-Advanced Examples
------------------
+More Examples
+-------------
 
 Moving on to more complicated examples...
 
 ****
-**Using regular expresssions**
+
+**Using regular expresssions (RegexLineHandler)**
+
 Example:
 ::
 
@@ -111,3 +113,37 @@ Output:
     Picked a strawberry
     >>> make blueberry jam
     Made some blueberry jam
+
+
+****
+
+**Using argparse (ArgparseLineHandler)**
+
+Example:
+::
+
+    class GameLineHandler(ArgparseLineHandler):
+        class Registry(ArgparseLineHandler.Registry):
+            pass
+
+        @Registry.bind('play', {
+            'game': {'type': str, 'default': 'nothing'},
+            '--well': {'action': 'store_true'},
+        })
+        def play(self, game, well):
+            self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
+
+        @Registry.bind('win')
+        def win(self):
+            self.context.write('I just won!\n')
+
+
+Output:
+::
+
+    >>> play chess --well
+    I play chess very well
+    >>> play monopoly
+    I play monopoly
+    >>> win
+    I just won!
