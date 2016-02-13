@@ -55,7 +55,7 @@ Now, imagine you decide to spice things up and add some time travel functionalit
             else:
                 raise CantParseLine(line)
 
-This is where we get to the problem of using the two handlers in our little app.
+At this point we have a problem: how do we use the two handlers in our app  simultaneously?
 
 Command contexts are a way of combining several handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` command context:
 
