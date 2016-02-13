@@ -439,4 +439,4 @@ def run_with_context(context):
 
 
 def run_with_handler(handler):
-    Commander(StandardPrompt([handler])).mainloop()
+    run_with_context(StandardPrompt([handler]))
