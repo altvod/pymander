@@ -248,10 +248,15 @@ And then use it like this:
 
 At this point you might be wondering, why we always also use ``StandardPrompt`` when inheriting from ``PrebuiltCommandContext``. That's because ``PrebuiltCommandContext`` is an abstract class and does not implement some of the required ``CommandContext`` methods. So this is where I'd normally send you to the full documentation of the project, but it's not finished yet, so, for now, you can just browse the source code of the examples and the ``pymander`` package itself :)
 
+Using Multiline Commands (text input)
+-------------------------------------
+
+Check out the `multi <https://github.com/altvod/pymander/blob/master/examples/multi.py>`_ and `fswalk <https://github.com/altvod/pymander/blob/master/examples/fswalk.py>`_ examples.
+
 
 Major TODOs
 -----------
 
-Here I'll be listing some of the major fetures that are not yet implementebut are crucial to the library's usability.
+Here I'll be listing some of the major fetures that are not yet implemented, but are crucial to the library's usability.
 
 #. an easy to use help mechanism. It should be able to list possible commands and how they should be used (like in argparse)
