@@ -260,3 +260,4 @@ Major TODOs
 Here I'll be listing some of the major fetures that are not yet implemented, but are crucial to the library's usability.
 
 #. an easy to use help mechanism. It should be able to list possible commands and how they should be used (like in argparse)
+#. read input by character instead of by line to handle special characters (`Esc`, `Ctrl`, arrows keys, etc.). This might also mean using OS-specific adapters for the console
