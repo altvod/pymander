@@ -4,7 +4,7 @@ PyMander
 Introduction
 ------------
 
-PyMander is a library for writing interactive command-line interface (CLI) applications in Python.
+PyMander (short for Python Commander) is a library for writing interactive command-line interface (CLI) applications in Python.
 
 Quick Usage Example
 -------------------
