@@ -184,15 +184,15 @@ class ArgparseLineHandler(LineHandler):
         return args._command_method(self, **kwargs)
 
 
-class ExitLineHandler(LineHandler):
+class ExitLineHandler(ExactLineHandler):
     """Exits the context when an 'exit' command is received."""
-    def try_execute(self, line):
-        if line.strip() == 'exit':
-            self.context.write('Bye!\n')
-            self.context.exit()
-            return
+    class Registry(ExactLineHandler.Registry):
+        pass
 
-        raise CantParseLine(line)
+    @Registry.bind('exit')
+    def exit(self):
+        self.context.write('Bye!\n')
+        self.context.exit()
 
 
 class EmptyLineHandler(LineHandler):
@@ -396,7 +396,6 @@ class PrebuiltCommandContext(CommandContext):
 
     def __init__(self, handlers=None, name=''):
         handlers = copy.copy(handlers) or []
-        print(self.Registry.bound_handler_classes)
         handlers = handlers + [
             handler_class() for handler_class in self.Registry.bound_handler_classes.values()
         ]
