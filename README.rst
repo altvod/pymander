@@ -10,7 +10,8 @@ Quick Usage Example
 -------------------
 
 Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that print the current date and time respectively. Then you would do something like this:
-::
+
+.. code-block:: python
 
     import time
     from pymander import LineHandler, CantParseLine, run_with_handler
@@ -28,6 +29,7 @@ Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that p
     run_with_handler(DatetimeLineHandler())
 
 And you'll get... (just type ``exit`` to exit the loop)
+
 ::
 
     >>> date
@@ -39,7 +41,8 @@ And you'll get... (just type ``exit`` to exit the loop)
 
 
 Now, imagine you decide to spice things up and add some time travel functionality to your app. It might be a good idea to keep this separate from the code that just shows the date and time, so go ahead and create a new handler:
-::
+
+.. code-block:: python
 
     import re
 
@@ -52,10 +55,11 @@ Now, imagine you decide to spice things up and add some time travel functionalit
             else:
                 raise CantParseLine(line)
 
-This is where we get to the problem of using the two handlers in our little app.
+At this point we have a problem: how do we use the two handlers in our app  simultaneously?
 
 Command contexts are a way of combining several handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` command context:
-::
+
+.. code-block:: python
 
     from pymander import StandardPrompt, run_with_context
     
@@ -67,13 +71,16 @@ Command contexts are a way of combining several handlers in a single scope so th
     )
 
 And back to the future we go!
+
 ::
+
     >>> date
     2016.14.14
     >>> go to date October 10 2058
     Traveling to date: October 10 2058
 
-It's worth mentioning that ``run_with_handler(context)`` is really a shortcut for ``run_with_context(StandardPrompt([context]))``.
+
+It's worth mentioning that ``run_with_handler(handler)`` is basically an acronym for ``run_with_context(StandardPrompt([handler]))``.
 
 ``StandardPrompt`` is a simple command context that includes the following features:
 
@@ -92,7 +99,8 @@ Moving on to more complicated examples...
 **Using regular expresssions (RegexLineHandler)**
 
 Example:
-::
+
+.. code-block:: python
 
     class BerryLineHandler(RegexLineHandler):
         class Registry(RegexLineHandler.Registry):
@@ -107,6 +115,7 @@ Example:
             self.context.write('Made some {0} jam\n'.format(berry_kind))
 
 Output:
+
 ::
 
     >>> pick a strawberry
@@ -120,7 +129,8 @@ Output:
 **Using argparse (ArgparseLineHandler)**
 
 Example:
-::
+
+.. code-block:: python
 
     class GameLineHandler(ArgparseLineHandler):
         class Registry(ArgparseLineHandler.Registry):
@@ -139,6 +149,7 @@ Example:
 
 
 Output:
+
 ::
 
     >>> play chess --well
@@ -147,3 +158,47 @@ Output:
     I play monopoly
     >>> win
     I just won!
+
+
+****
+
+**Combining argparse and regexes using PrebuiltCommandContext**
+
+Sometimes you might find it useful to be able to use both approaches together or be able to switch from one to another without making a mess of a whole bunch of handlers.
+
+``PrebuiltCommandContext`` allows you to use decorators to assign its own methods as either argparse or regex commands in a single (command context) class without having to define the handlers yourself:
+
+.. code-block:: python
+
+    from pymander import PrebuiltCommandContext, StandardPrompt, run_with_context
+    
+    class SaladContext(PrebuiltCommandContext, StandardPrompt):
+        class Registry(PrebuiltCommandContext.Registry):
+            pass
+
+        @Registry.bind_regex(r'(?P<do_what>eat|cook) caesar')
+        def caesar_salad(self, do_what):
+            self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
+
+        @Registry.bind_argparse('buy', {
+            'kind_of_salad': {},
+            ('--price', '-p'): {'default': None}
+        })
+        def buy_salad(self, kind_of_salad, price):
+            self.write('Buying {0} salad{1}...\n'.format(
+                kind_of_salad, ' for {0}'.format(price) if price else '')
+            )
+    
+    run_with_context(SaladContext())
+
+
+Example:
+
+::
+
+    >>> cook caesar
+    Cooking caesar salad...
+    >>> buy greek
+    Buying greek salad...
+    >>> buy russian --price $5
+    Buying russian salad for $5...
