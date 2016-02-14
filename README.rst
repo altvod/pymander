@@ -245,3 +245,5 @@ And then use it like this:
         def do_whatever(self, *your_method_args):
             self.write('Whaterver, bro\n')
 
+
+At this point you might be wondering, why we always also use ``StandardPrompt`` when inheriting from ``PrebuiltCommandContext``. That's because ``PrebuiltCommandContext`` is and abstract class and does not implement some of the required CommandContext methods. So this is where I'd normally send you to the full documentation of the project, but it's not finished yet, so, for now, you can just browse the source code of the examples and the ``pymander`` package itself :)
