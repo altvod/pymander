@@ -40,7 +40,7 @@ And you'll get... (just type ``exit`` to exit the loop)
     Bye!
 
 
-Now, imagine you decide to spice things up and add some time travel functionality to your app. It might be a good idea to keep this separate from the code that just shows the date and time, so go ahead and create a new handler:
+Now, imagine you decide to spice things up and add some time travel functionality to your app. Adding a lot of commands to the same function as if blocks is not a very good idea, besides you might want to keep warping of the Universe separate from the code that just shows the date and time, so go ahead and create a new handler:
 
 .. code-block:: python
 
@@ -202,3 +202,46 @@ Example:
     Buying greek salad...
     >>> buy russian --price $5
     Buying russian salad for $5...
+
+
+The ``PrebuiltCommandContext.Registry`` class includes for decorators for assigning methods to specific handlers:
+
+- ``bind_exact(command)`` binds to ``ExactLineHandler`` (matches the line exactly to the specified string, e.g. the ``exit`` command)
+- ``bind_argparse(command, options)`` binds to ``ArgparseLineHandler`` (uses argparse to evaluate the line)
+- ``bind_regex(regex)`` binds to ``RegexLineHandler`` (matches the line to regular expressions)
+
+and one generic decorator:
+
+- ``bind_to_handler(handler_class, *args)``
+
+binds to any given LineHandler subclass with one requirement: it must have a nested ``Registry`` class with classmethod ``bind`` (ideally a parameterized decorator). Like this:
+
+.. code-block:: python
+
+    class MyLineHandler(LineHandler):
+        class Registry:
+            @classmethod
+            def bind(cls, *args):
+                def decorator(method):
+                    # register it to cls somehow...
+                    return method
+                return decorator
+        
+        def try_execute(self, line):
+            # go over registered methods in self.Registry, choose one and call it
+            # otherwise raise CantParseLine
+            pass
+
+
+And then use it like this:
+
+.. code-block:: python
+
+    class MyPrebuiltContext(PrebuiltCommandContext, StandardPrompt):
+        class Registry(PrebuiltCommandContext.Registry):
+            pass
+
+        @Registry.bind_to_handler(MyLineHandler, 'some', 'arguments')
+        def do_whatever(self, *your_method_args):
+            self.write('Whaterver, bro\n')
+
