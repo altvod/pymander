@@ -251,8 +251,9 @@ At this point you might be wondering, why we always also use ``StandardPrompt`` 
 Using Nested Contexts
 ---------------------
 
-An obvous extension would be the ability to enter a new context on some commands and then exit them (multi-step commands, entering and exiting a file editor, etc.). All you have to do to use this is return an instance of a new ``CommandContext`` from you command, and you're in! Just don't forget to supply this context with an ``exit``, or you'll be stuck in there forever.
-See ``DeeperLineHandler`` in the `simple <https://github.com/altvod/pymander/blob/master/examples/simple.py>`_ example
+An obvous extension would be the ability to enter a new context on some commands and then exit them (multi-step commands, entering and exiting a file editor, etc.). All you have to do to use this is return an instance of a new ``CommandContext`` from your command, and you're in! Just don't forget to supply this context with an ``exit``, or you'll be stuck in there forever.
+
+See ``DeeperLineHandler`` in the `simple <https://github.com/altvod/pymander/blob/master/examples/simple.py>`_ example.
 
 
 Using Multiline Commands (text input)
