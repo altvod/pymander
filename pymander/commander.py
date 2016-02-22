@@ -343,10 +343,12 @@ class StandardPrompt(CommandContext):
     force_handlers = [EmptyLineHandler, EchoLineHandler, ExitLineHandler]
 
     def prompt(self):
-        if self.name:
-            self.write('{0} > '.format(self.name))
-        else:
-            self.write('>>> ')
+        if self.out_stream:
+            if self.name:
+                self.out_stream.write('{0} > '.format(self.name))
+            else:
+                self.out_stream.write('>>> ')
+            self.out_stream.flush()
 
     def on_cant_execute(self, line):
         self.write('Invalid command: {0}'.format(line))
