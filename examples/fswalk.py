@@ -30,7 +30,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
         super().__init__(*args, **kwargs)
         self.current_dir = os.path.abspath('.')
 
-    @Registry.bind_argparse('cd', {'dirname': {}})
+    @Registry.bind_argparse('cd', ['dirname'])
     def cd(self, dirname):
         full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
         if not os.path.exists(full_dirname):
@@ -56,7 +56,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
 
         self.write('{0}\n'.format('\n'.join(sorted(os.listdir(full_dirname)))))
 
-    @Registry.bind_argparse('mkdir', {'dirname': {}})
+    @Registry.bind_argparse('mkdir', ['dirname'])
     def mkdir(self, dirname):
         if not os.path.exists(self.current_dir):
             self.write('No such dir: {0}\n'.format(dirname))
@@ -65,7 +65,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
         full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
         os.mkdir(full_dirname)
 
-    @Registry.bind_argparse('new', {'filename': {}})
+    @Registry.bind_argparse('new', ['filename'])
     def new(self, filename):
         if not os.path.exists(self.current_dir):
             self.write('No such dir: {0}\n'.format(filename))

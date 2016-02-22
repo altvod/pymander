@@ -39,10 +39,10 @@ class GameLineHandler(ArgparseLineHandler):
     class Registry(ArgparseLineHandler.Registry):
         pass
 
-    @Registry.bind('play', {
-        'game': {'type': str, 'default': 'nothing'},
-        '--well': {'action': 'store_true'},
-    })
+    @Registry.bind('play', [
+        ['game', {'type': str, 'default': 'nothing'}],
+        ['--well', {'action': 'store_true'}],
+    ])
     def play(self, game, well):
         self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
 

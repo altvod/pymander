@@ -137,14 +137,14 @@ class ArgparseLineHandler(LineHandler):
         command_methods = []
 
         @classmethod
-        def bind(cls, command, options=None):
-            options = options or {}
+        def bind(cls, command, options=None, help=''):
+            options = options or ()
             if not cls.command_methods:
                 # redefine cls.command_methods so that this list is independent of the superclass's
                 cls.command_methods = []
 
             def decorator(method):
-                cls.command_methods.append([method, command, options])
+                cls.command_methods.append([method, command, options, help])
                 return method
 
             return decorator
@@ -160,15 +160,18 @@ class ArgparseLineHandler(LineHandler):
             self.handler.add_argument(*option, **option_args)
 
         subparsers = self.handler.add_subparsers()
-        for method, command, options in self.registry.command_methods:
+        for method, command, options, help in self.registry.command_methods:
             subparser = subparsers.add_parser(
-                command, allow_help=True, line_handler=self, help=options.get('help', '')
+                command, allow_help=True, line_handler=self, help=help
             )
             subparser.set_defaults(_command_method=method)
-            for option, option_args in options.items():
-                if not isinstance(option, tuple):
+            for option in options:
+                if isinstance(option, str):
                     option = (option,)
-                subparser.add_argument(*option, **option_args)
+                option_args = [item for item in option if isinstance(item, str)]
+                option_kwargs_l = [item for item in option if isinstance(item, dict)]
+                option_kwargs = option_kwargs_l[0] if option_kwargs_l else {}
+                subparser.add_argument(*option_args, **option_kwargs)
 
     def try_execute(self, line):
         if not line.strip():

@@ -7,9 +7,9 @@ class StarTrekLineHandler(ArgparseLineHandler):
     class Registry(ArgparseLineHandler.Registry):
         pass
 
-    @Registry.bind('boldly_read', {
-        ('--format', '-f'): {'dest': 'text_format', 'default': 'plain'}
-    })
+    @Registry.bind('boldly_read', [
+        ['--format', '-f', {'dest': 'text_format', 'default': 'plain'}]
+    ])
     def boldly_read(self, text_format):
         if text_format != 'json':
             self.context.write('Unbold format: {0}\n'.format(text_format))
