@@ -6,8 +6,8 @@ Introduction
 
 PyMander (short for Python Commander) is a library for writing interactive command-line interface (CLI) applications in Python.
 
-Quick Usage Example
--------------------
+Quick Start
+-----------
 
 Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that print the current date and time respectively. Then you would do something like this:
 
@@ -40,7 +40,7 @@ And you'll get... (just type ``exit`` to exit the loop)
     Bye!
 
 
-Now, imagine you decide to spice things up and add some time travel functionality to your app. It might be a good idea to keep this separate from the code that just shows the date and time, so go ahead and create a new handler:
+Now, imagine you decide to spice things up and add some time travel functionality to your app. Adding a lot of commands to the same function as if blocks is not a very good idea, besides you might want to keep warping of the Universe separate from the code that just shows the date and time, so go ahead and create a new handler:
 
 .. code-block:: python
 
@@ -136,10 +136,10 @@ Example:
         class Registry(ArgparseLineHandler.Registry):
             pass
 
-        @Registry.bind('play', {
-            'game': {'type': str, 'default': 'nothing'},
-            '--well': {'action': 'store_true'},
-        })
+        @Registry.bind('play', [
+            ['game', {'type': str, 'default': 'nothing'}],
+            ['--well', {'action': 'store_true'}],
+        ])
         def play(self, game, well):
             self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
 
@@ -180,10 +180,10 @@ Sometimes you might find it useful to be able to use both approaches together or
         def caesar_salad(self, do_what):
             self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
 
-        @Registry.bind_argparse('buy', {
-            'kind_of_salad': {},
-            ('--price', '-p'): {'default': None}
-        })
+        @Registry.bind_argparse('buy', [
+            'kind_of_salad',
+            ['--price', '-p', {'default': None}]
+        ])
         def buy_salad(self, kind_of_salad, price):
             self.write('Buying {0} salad{1}...\n'.format(
                 kind_of_salad, ' for {0}'.format(price) if price else '')
@@ -202,3 +202,70 @@ Example:
     Buying greek salad...
     >>> buy russian --price $5
     Buying russian salad for $5...
+
+
+The ``PrebuiltCommandContext.Registry`` class includes for decorators for assigning methods to specific handlers:
+
+- ``bind_exact(command)`` binds to ``ExactLineHandler`` (matches the line exactly to the specified string, e.g. the ``exit`` command)
+- ``bind_argparse(command, options)`` binds to ``ArgparseLineHandler`` (uses argparse to evaluate the line)
+- ``bind_regex(regex)`` binds to ``RegexLineHandler`` (matches the line to regular expressions)
+
+and one generic decorator:
+
+- ``bind_to_handler(handler_class, *args)``
+
+binds to any given LineHandler subclass with one requirement: it must have a nested ``Registry`` class with classmethod ``bind`` (ideally a parameterized decorator). Like this:
+
+.. code-block:: python
+
+    class MyLineHandler(LineHandler):
+        class Registry:
+            @classmethod
+            def bind(cls, *args):
+                def decorator(method):
+                    # register it to cls somehow...
+                    return method
+                return decorator
+        
+        def try_execute(self, line):
+            # go over registered methods in self.Registry, choose one and call it
+            # otherwise raise CantParseLine
+            pass
+
+
+And then use it like this:
+
+.. code-block:: python
+
+    class MyPrebuiltContext(PrebuiltCommandContext, StandardPrompt):
+        class Registry(PrebuiltCommandContext.Registry):
+            pass
+
+        @Registry.bind_to_handler(MyLineHandler, 'some', 'arguments')
+        def do_whatever(self, *your_method_args):
+            self.write('Whaterver, bro\n')
+
+
+At this point you might be wondering, why we always also use ``StandardPrompt`` when inheriting from ``PrebuiltCommandContext``. That's because ``PrebuiltCommandContext`` is an abstract class and does not implement some of the required ``CommandContext`` methods. So this is where I'd normally send you to the full documentation of the project, but it's not finished yet, so, for now, you can just browse the source code of the examples and the ``pymander`` package itself :)
+
+Using Nested Contexts
+---------------------
+
+An obvous extension would be the ability to enter a new context on some commands and then exit them (multi-step commands, entering and exiting a file editor, etc.). All you have to do to use this is return an instance of a new ``CommandContext`` from your command, and you're in! Just don't forget to supply this context with an ``exit``, or you'll be stuck in there forever.
+
+See ``DeeperLineHandler`` in the `simple <https://github.com/altvod/pymander/blob/master/examples/simple.py>`_ example.
+
+
+Using Multiline Commands (text input)
+-------------------------------------
+
+Check out the `multi <https://github.com/altvod/pymander/blob/master/examples/multi.py>`_ and `fswalk <https://github.com/altvod/pymander/blob/master/examples/fswalk.py>`_ examples.
+
+
+Major TODOs
+-----------
+
+Here I'll be listing some of the major fetures that are not yet implemented, but are crucial to the library's usability.
+
+#. an easy to use help mechanism. It should be able to list possible commands and how they should be used (like in argparse)
+#. read input by character instead of by line to handle special characters (`Esc`, `Ctrl`, arrows keys, etc.). This might also mean using OS-specific adapters for the console
