@@ -136,10 +136,10 @@ Example:
         class Registry(ArgparseLineHandler.Registry):
             pass
 
-        @Registry.bind('play', {
-            'game': {'type': str, 'default': 'nothing'},
-            '--well': {'action': 'store_true'},
-        })
+        @Registry.bind('play', [
+            ['game', {'type': str, 'default': 'nothing'}],
+            ['--well', {'action': 'store_true'}],
+        ])
         def play(self, game, well):
             self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
 
@@ -180,10 +180,10 @@ Sometimes you might find it useful to be able to use both approaches together or
         def caesar_salad(self, do_what):
             self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
 
-        @Registry.bind_argparse('buy', {
-            'kind_of_salad': {},
-            ('--price', '-p'): {'default': None}
-        })
+        @Registry.bind_argparse('buy', [
+            'kind_of_salad',
+            ['--price', '-p', {'default': None}]
+        ])
         def buy_salad(self, kind_of_salad, price):
             self.write('Buying {0} salad{1}...\n'.format(
                 kind_of_salad, ' for {0}'.format(price) if price else '')
