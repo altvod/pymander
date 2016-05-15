@@ -1,6 +1,7 @@
 import os
 
-from pymander import PrebuiltCommandContext, MultiLineContext, StandardPrompt, run_with_context
+from pymander.contexts import PrebuiltCommandContext, MultiLineContext, StandardPrompt
+from pymander.commander import run_with_context
 
 
 class FileWriterContext(MultiLineContext):

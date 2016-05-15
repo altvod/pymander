@@ -14,7 +14,9 @@ Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that p
 .. code-block:: python
 
     import time
-    from pymander import LineHandler, CantParseLine, run_with_handler
+    from pymander.handlers import LineHandler
+    from pymander.exceptions import CantParseLine
+    from pymander.commander import run_with_handler
     
     class DatetimeLineHandler(LineHandler):
         def try_execute(self, line):
@@ -61,7 +63,8 @@ Command contexts are a way of combining several handlers in a single scope so th
 
 .. code-block:: python
 
-    from pymander import StandardPrompt, run_with_context
+    from pymander.contexts import StandardPrompt
+    from pymander.commander import run_with_context
     
     run_with_context(
         StandardPrompt([
@@ -170,7 +173,8 @@ Sometimes you might find it useful to be able to use both approaches together or
 
 .. code-block:: python
 
-    from pymander import PrebuiltCommandContext, StandardPrompt, run_with_context
+    from pymander.contexts import PrebuiltCommandContext, StandardPrompt
+    from pymander.commander import run_with_context
     
     class SaladContext(PrebuiltCommandContext, StandardPrompt):
         class Registry(PrebuiltCommandContext.Registry):

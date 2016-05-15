@@ -1,5 +1,7 @@
-from pymander import CantParseLine, LineHandler, RegexLineHandler, ArgparseLineHandler, \
-    StandardPrompt, Commander
+from pymander.exceptions import CantParseLine
+from pymander.handlers import LineHandler, RegexLineHandler, ArgparseLineHandler
+from pymander.contexts import StandardPrompt
+from pymander.commander import Commander
 
 
 class DeeperLineHandler(LineHandler):
