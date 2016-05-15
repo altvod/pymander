@@ -1,7 +1,7 @@
 import sys
 
 from .exceptions import ExitMainloop, ExitContext
-from .contexts import CommandContext, StandardPrompt
+from .contexts import CommandContext
 
 
 __all__ = ['Commander', 'run_with_context', 'run_with_handler']
@@ -44,13 +44,16 @@ class Commander:
         except ExitContext:
             self.exit_current_context()
 
+    def read_and_execute(self):
+        self.context.prompt()
+        line = self.in_stream.readline()
+        self.execute(line)
+
     def mainloop(self):
         """Main commander loop: read lines and interpret them."""
         while True:
             try:
-                self.context.prompt()
-                line = self.in_stream.readline()
-                self.execute(line)
+                self.read_and_execute()
 
             except ExitMainloop:
                 break
@@ -67,13 +70,3 @@ class Commander:
             raise ExitMainloop
 
         self.context_stack.pop()
-
-
-# shortcut functions ##################################
-
-def run_with_context(context):
-    Commander(context).mainloop()
-
-
-def run_with_handler(handler):
-    run_with_context(StandardPrompt([handler]))
