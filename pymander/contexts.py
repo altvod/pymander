@@ -15,7 +15,7 @@ class CommandContext(metaclass=abc.ABCMeta):
     force_handlers = []
 
     def __init__(self, handlers=None, name='', ignore_force_handlers=False):
-        # cosntruct handler list
+        # construct handler list
         self.handlers = copy.copy(handlers) or [handler_class() for handler_class in self.default_handlers]
         if not ignore_force_handlers:
             self.handlers += [handler_class() for handler_class in self.force_handlers]
