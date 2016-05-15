@@ -40,7 +40,7 @@ And you'll get... (just type ``exit`` to exit the loop)
     Bye!
 
 
-Now, imagine you decide to spice things up and add some time travel functionality to your app. Adding a lot of commands to the same function as if blocks is not a very good idea, besides you might want to keep warping of the Universe separate from the code that just shows the date and time, so go ahead and create a new handler:
+Let's spice things up and add some time travel functionality to your app. Adding a lot of commands to the same function as if-blocks is not a very good idea, besides you might want to keep warping of the Universe separate from the code that just shows the date and time, so go ahead and create a new handler:
 
 .. code-block:: python
 
@@ -80,13 +80,13 @@ And back to the future we go!
     Traveling to date: October 10 2058
 
 
-It's worth mentioning that ``run_with_handler(handler)`` is basically an acronym for ``run_with_context(StandardPrompt([handler]))``.
+It's worth mentioning that ``run_with_handler(handler)`` is basically a shortcut for ``run_with_context(StandardPrompt([handler]))``.
 
 ``StandardPrompt`` is a simple command context that includes the following features:
 
 - prints the ``">>> "`` when prompting for a new command
 - writes "Invalid command: ..." when it cannot recognize a command
-- adds the ``EchoLineHandler`` and ``ExitLineHandler`` handlers, which implement the ``echo`` and ``exit`` commands familiar to everyone
+- adds the ``EchoLineHandler`` and ``ExitLineHandler`` handlers, which implement the ``echo`` and ``exit`` commands, which do pretty much what you expect them to do
 
 
 More Examples
