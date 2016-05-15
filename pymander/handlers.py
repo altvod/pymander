@@ -5,6 +5,10 @@ import re
 from .exceptions import CantParseLine, SkipExecution
 
 
+__all__ = ['LineHandler', 'RegexLineHandler', 'ExactLineHandler', 'ArgparseLineHandler',
+           'ExitLineHandler', 'EmptyLineHandler', 'EchoLineHandler']
+
+
 class LineHandler(metaclass=abc.ABCMeta):
     def __init__(self):
         self.context = None
@@ -196,7 +200,3 @@ class EchoLineHandler(RegexLineHandler):
     @Registry.bind(r'^echo (?P<what>.*)\n?')
     def echo(self, what):
         self.context.write('{0}\n'.format(what))
-
-
-__all__ = [LineHandler, RegexLineHandler, ExactLineHandler, ArgparseLineHandler,
-           ExitLineHandler,EmptyLineHandler, EchoLineHandler]

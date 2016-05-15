@@ -1,3 +1,6 @@
+__all__ = ['CantParseLine', 'SkipExecution', 'ExitContext', 'ExitMainloop']
+
+
 class CantParseLine(Exception):
     pass
 
@@ -12,6 +15,3 @@ class ExitContext(Exception):
 
 class ExitMainloop(Exception):
     pass
-
-
-__all__ = [CantParseLine, SkipExecution, ExitContext, ExitMainloop]

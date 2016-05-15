@@ -7,6 +7,9 @@ from .handlers import LineHandler, EmptyLineHandler, EchoLineHandler, ExitLineHa
     ExactLineHandler, ArgparseLineHandler, RegexLineHandler
 
 
+__all__ = ['CommandContext', 'MultiLineContext', 'JsonContext', 'StandardPrompt', 'PrebuiltCommandContext']
+
+
 class CommandContext(metaclass=abc.ABCMeta):
     default_handlers = []
     force_handlers = []

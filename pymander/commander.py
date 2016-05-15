@@ -4,6 +4,9 @@ from .exceptions import ExitMainloop, ExitContext
 from .contexts import CommandContext, StandardPrompt
 
 
+__all__ = ['Commander', 'run_with_context', 'run_with_handler']
+
+
 class Commander:
     """
     Main class that orchestrates everything:
@@ -74,6 +77,3 @@ def run_with_context(context):
 
 def run_with_handler(handler):
     run_with_context(StandardPrompt([handler]))
-
-
-__all__ = [Commander, run_with_context, run_with_handler]
