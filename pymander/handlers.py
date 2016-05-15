@@ -27,26 +27,22 @@ class LineHandler(metaclass=abc.ABCMeta):
 
 class RegexLineHandler(LineHandler):
     """Interprets commands via matching to regular expressions."""
-    command_methods = []
 
     class Registry:
-        command_methods = []
+        def __init__(self):
+            self.command_methods = []
 
-        @classmethod
-        def bind(cls, expr):
-            if not cls.command_methods:
-                # redefine cls.command_methods so that this list is independent of the superclass's
-                cls.command_methods = []
-
+        def bind(self, expr):
             def decorator(method):
-                cls.command_methods.append([expr, method])
+                self.command_methods.append([expr, method])
                 return method
 
             return decorator
 
+    registry = Registry()
+
     def __init__(self):
         super().__init__()
-        self.registry = self.Registry()
 
     def try_execute(self, line):
         for expr, method in self.registry.command_methods:
@@ -59,26 +55,22 @@ class RegexLineHandler(LineHandler):
 
 class ExactLineHandler(LineHandler):
     """Matches line to exact expressions."""
-    command_methods = []
 
     class Registry:
-        command_methods = []
+        def __init__(self):
+            self.command_methods = []
 
-        @classmethod
-        def bind(cls, expr):
-            if not cls.command_methods:
-                # redefine cls.command_methods so that this list is independent of the superclass's
-                cls.command_methods = []
-
+        def bind(self, expr):
             def decorator(method):
-                cls.command_methods.append([expr, method])
+                self.command_methods.append([expr, method])
                 return method
 
             return decorator
 
+    registry = Registry()
+
     def __init__(self):
         super().__init__()
-        self.registry = self.Registry()
 
     def try_execute(self, line):
         for expr, method in self.registry.command_methods:
@@ -121,24 +113,22 @@ class ArgparseLineHandler(LineHandler):
     common_options = {}
 
     class Registry:
-        command_methods = []
+        def __init__(self):
+            self.command_methods = []
 
-        @classmethod
-        def bind(cls, command, options=None, help=''):
+        def bind(self, command, options=None, help=''):
             options = options or ()
-            if not cls.command_methods:
-                # redefine cls.command_methods so that this list is independent of the superclass's
-                cls.command_methods = []
 
             def decorator(method):
-                cls.command_methods.append([method, command, options, help])
+                self.command_methods.append([method, command, options, help])
                 return method
 
             return decorator
 
+    registry = Registry()
+
     def __init__(self):
         super().__init__()
-        self.registry = self.Registry()
 
         self.handler = ArgumentParserWrapper(prog='')
         for option, option_args in self.common_options.items():
@@ -176,10 +166,9 @@ class ArgparseLineHandler(LineHandler):
 
 class ExitLineHandler(ExactLineHandler):
     """Exits the context when an 'exit' command is received."""
-    class Registry(ExactLineHandler.Registry):
-        pass
+    registry = ExactLineHandler.Registry()
 
-    @Registry.bind('exit')
+    @registry.bind('exit')
     def exit(self):
         self.context.write('Bye!\n')
         self.context.exit()
@@ -194,9 +183,8 @@ class EmptyLineHandler(LineHandler):
 
 class EchoLineHandler(RegexLineHandler):
     """Imitates the 'echo' shell command."""
-    class Registry(RegexLineHandler.Registry):
-        pass
+    registry = RegexLineHandler.Registry()
 
-    @Registry.bind(r'^echo (?P<what>.*)\n?')
+    @registry.bind(r'^echo (?P<what>.*)\n?')
     def echo(self, what):
         self.context.write('{0}\n'.format(what))

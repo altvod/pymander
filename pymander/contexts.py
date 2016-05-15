@@ -154,49 +154,42 @@ class StandardPrompt(CommandContext):
 
 class PrebuiltCommandContext(CommandContext):
     class Registry:
-        bound_handler_classes = {}
+        def __init__(self):
+            self.bound_handler_classes = {}
 
-        @classmethod
-        def bind_to_handler(cls, handler_cls, *bind_args):
+        def bind_to_handler(self, handler_cls, *bind_args):
             """Bind the context's method to a LineParser class with a nested Registry class."""
             def decorator(method):
-                if not cls.bound_handler_classes:
-                    # re-initialize cls.cls.bound_handler_classes so that it's independent of the superclass's
-                    cls.bound_handler_classes = {}
-
-                own_cls_name = cls.__name__
+                own_cls_name = self.__class__.__name__
                 handler_cls_name = handler_cls.__name__
-                # add handler class to cls.bound_handler_classes not added already
-                if handler_cls_name not in cls.bound_handler_classes:
-                    cls.bound_handler_classes[handler_cls_name] = type(
+                # add handler class to self.bound_handler_classes not yet added
+                if handler_cls_name not in self.bound_handler_classes:
+                    self.bound_handler_classes[handler_cls_name] = type(
                         '{0}.{1}'.format(own_cls_name, handler_cls_name), (handler_cls,), {}
                     )
-                    cls.bound_handler_classes[handler_cls_name].Registry = type(
-                        '{0}.{1}.Registry'.format(own_cls_name, handler_cls_name), (handler_cls.Registry,), {}
-                    )
+                    self.bound_handler_classes[handler_cls_name].registry = handler_cls.Registry()
 
                 def redirect_method(handler_self, *args, **kwargs):
                     return method(handler_self.context, *args, **kwargs)
 
-                cls.bound_handler_classes[handler_cls_name].Registry.bind(*bind_args)(redirect_method)
+                self.bound_handler_classes[handler_cls_name].registry.bind(*bind_args)(redirect_method)
 
             return decorator
 
-        @classmethod
-        def bind_exact(cls, *bind_args):
-            return cls.bind_to_handler(ExactLineHandler, *bind_args)
+        def bind_exact(self, *bind_args):
+            return self.bind_to_handler(ExactLineHandler, *bind_args)
 
-        @classmethod
-        def bind_regex(cls, *bind_args):
-            return cls.bind_to_handler(RegexLineHandler, *bind_args)
+        def bind_regex(self, *bind_args):
+            return self.bind_to_handler(RegexLineHandler, *bind_args)
 
-        @classmethod
-        def bind_argparse(cls, *bind_args):
-            return cls.bind_to_handler(ArgparseLineHandler, *bind_args)
+        def bind_argparse(self, *bind_args):
+            return self.bind_to_handler(ArgparseLineHandler, *bind_args)
+
+    registry = Registry()
 
     def __init__(self, handlers=None, name=''):
         handlers = copy.copy(handlers) or []
         handlers = handlers + [
-            handler_class() for handler_class in self.Registry.bound_handler_classes.values()
+            handler_class() for handler_class in self.registry.bound_handler_classes.values()
         ]
         super().__init__(handlers=handlers, name=name)

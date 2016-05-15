@@ -4,10 +4,9 @@ from pymander import ArgparseLineHandler, JsonContext, StandardPrompt, Commander
 
 
 class StarTrekLineHandler(ArgparseLineHandler):
-    class Registry(ArgparseLineHandler.Registry):
-        pass
+    registry = ArgparseLineHandler.Registry()
 
-    @Registry.bind('boldly_read', [
+    @registry.bind('boldly_read', [
         ['--format', '-f', {'dest': 'text_format', 'default': 'plain'}]
     ])
     def boldly_read(self, text_format):

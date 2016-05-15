@@ -23,30 +23,28 @@ class RaynorLineHandler(LineHandler):
 
 
 class BerryLineHandler(RegexLineHandler):
-    class Registry(RegexLineHandler.Registry):
-        pass
+    registry = RegexLineHandler.Registry()
 
-    @Registry.bind(r'pick a (?P<berry_kind>\w+)')
+    @registry.bind(r'pick a (?P<berry_kind>\w+)')
     def pick_berry(self, berry_kind):
         self.context.write('Picked a {0}\n'.format(berry_kind))
 
-    @Registry.bind(r'make (?P<berry_kind>\w+) jam')
+    @registry.bind(r'make (?P<berry_kind>\w+) jam')
     def make_jam(self, berry_kind):
         self.context.write('Made some {0} jam\n'.format(berry_kind))
 
 
 class GameLineHandler(ArgparseLineHandler):
-    class Registry(ArgparseLineHandler.Registry):
-        pass
+    registry = ArgparseLineHandler.Registry()
 
-    @Registry.bind('play', [
+    @registry.bind('play', [
         ['game', {'type': str, 'default': 'nothing'}],
         ['--well', {'action': 'store_true'}],
     ])
     def play(self, game, well):
         self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
 
-    @Registry.bind('win')
+    @registry.bind('win')
     def win(self):
         self.context.write('I just won!\n')
 

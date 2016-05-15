@@ -23,14 +23,13 @@ class FileWriterContext(MultiLineContext):
 
 
 class FsContext(PrebuiltCommandContext, StandardPrompt):
-    class Registry(PrebuiltCommandContext.Registry):
-        pass
+    registry = PrebuiltCommandContext.Registry()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.current_dir = os.path.abspath('.')
 
-    @Registry.bind_argparse('cd', ['dirname'])
+    @registry.bind_argparse('cd', ['dirname'])
     def cd(self, dirname):
         full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
         if not os.path.exists(full_dirname):
@@ -39,7 +38,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
 
         self.current_dir = full_dirname
 
-    @Registry.bind_regex('^ls(\s+(?P<dirname>\w+))?')
+    @registry.bind_regex('^ls(\s+(?P<dirname>\w+))?')
     def ls(self, dirname):
         if dirname:
             full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
@@ -56,7 +55,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
 
         self.write('{0}\n'.format('\n'.join(sorted(os.listdir(full_dirname)))))
 
-    @Registry.bind_argparse('mkdir', ['dirname'])
+    @registry.bind_argparse('mkdir', ['dirname'])
     def mkdir(self, dirname):
         if not os.path.exists(self.current_dir):
             self.write('No such dir: {0}\n'.format(dirname))
@@ -65,7 +64,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
         full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
         os.mkdir(full_dirname)
 
-    @Registry.bind_argparse('new', ['filename'])
+    @registry.bind_argparse('new', ['filename'])
     def new(self, filename):
         if not os.path.exists(self.current_dir):
             self.write('No such dir: {0}\n'.format(filename))

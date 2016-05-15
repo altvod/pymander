@@ -2,14 +2,13 @@ from pymander import PrebuiltCommandContext, StandardPrompt, Commander
 
 
 class SaladContext(PrebuiltCommandContext, StandardPrompt):
-    class Registry(PrebuiltCommandContext.Registry):
-        pass
+    registry = PrebuiltCommandContext.Registry()
 
-    @Registry.bind_regex(r'(?P<do_what>eat|cook) caesar')
+    @registry.bind_regex(r'(?P<do_what>eat|cook) caesar')
     def caesar_salad(self, do_what):
         self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
 
-    @Registry.bind_argparse('buy', [
+    @registry.bind_argparse('buy', [
         'kind_of_salad',
         ['--price', '-p', {'default': None}]
     ])
