@@ -3,3 +3,4 @@
 /dist
 /env
 /pymander.egg-info
+**/__pycache__
