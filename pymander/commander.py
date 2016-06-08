@@ -4,7 +4,7 @@ from .exceptions import ExitMainloop, ExitContext
 from .contexts import CommandContext
 
 
-__all__ = ['Commander', 'run_with_context', 'run_with_handler']
+__all__ = ['Commander']
 
 
 class Commander:
