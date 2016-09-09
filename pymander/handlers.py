@@ -1,8 +1,10 @@
 import abc
 import argparse
+import inspect
 import re
 
 from .exceptions import CantParseLine, SkipExecution
+from.decorators import bind_command
 
 
 __all__ = ['LineHandler', 'RegexLineHandler', 'ExactLineHandler', 'ArgparseLineHandler',
@@ -12,6 +14,14 @@ __all__ = ['LineHandler', 'RegexLineHandler', 'ExactLineHandler', 'ArgparseLineH
 class LineHandler(metaclass=abc.ABCMeta):
     def __init__(self):
         self.context = None
+        self.command_methods = []
+        methods = inspect.getmembers(self.__class__, predicate=inspect.isfunction)
+        for method_tuple in methods:
+            method = method_tuple[1]
+            if getattr(method, '_bound_command', False):
+                self.command_methods.append(
+                    {'method': method, 'args': method._args, 'kwargs': method._kwargs}
+                )
 
     def set_context(self, context):
         self.context = context
@@ -34,7 +44,9 @@ class RegexLineHandler(LineHandler):
 
         def bind(self, expr):
             def decorator(method):
-                self.command_methods.append([expr, method])
+                self.command_methods.append(
+                    {'method': method, 'args': (expr,), 'kwargs': {}}
+                )
                 return method
 
             return decorator
@@ -43,12 +55,14 @@ class RegexLineHandler(LineHandler):
 
     def __init__(self):
         super().__init__()
+        self.command_methods += self.registry.command_methods
 
     def try_execute(self, line):
-        for expr, method in self.registry.command_methods:
+        for command_info in self.command_methods:
+            expr = command_info['args'][0]
             match = re.match(expr, line)
             if match:
-                return method(self, **match.groupdict())
+                return command_info['method'](self, **match.groupdict())
 
         raise CantParseLine(line)
 
@@ -62,7 +76,9 @@ class ExactLineHandler(LineHandler):
 
         def bind(self, expr):
             def decorator(method):
-                self.command_methods.append([expr, method])
+                self.command_methods.append(
+                    {'method': method, 'args': (expr,), 'kwargs': {}}
+                )
                 return method
 
             return decorator
@@ -71,11 +87,13 @@ class ExactLineHandler(LineHandler):
 
     def __init__(self):
         super().__init__()
+        self.command_methods += self.registry.command_methods
 
     def try_execute(self, line):
-        for expr, method in self.registry.command_methods:
+        for command_info in self.command_methods:
+            expr = command_info['args'][0]
             if line.strip() == expr:
-                return method(self)
+                return command_info['method'](self)
 
         raise CantParseLine(line)
 
@@ -120,7 +138,9 @@ class ArgparseLineHandler(LineHandler):
             options = options or ()
 
             def decorator(method):
-                self.command_methods.append([method, command, options, help])
+                self.command_methods.append(
+                    {'method': method, 'args': (command, options), 'kwargs': {'help': help}}
+                )
                 return method
 
             return decorator
@@ -129,6 +149,7 @@ class ArgparseLineHandler(LineHandler):
 
     def __init__(self):
         super().__init__()
+        self.command_methods += self.registry.command_methods
 
         self.handler = ArgumentParserWrapper(prog='')
         for option, option_args in self.common_options.items():
@@ -137,11 +158,13 @@ class ArgparseLineHandler(LineHandler):
             self.handler.add_argument(*option, **option_args)
 
         subparsers = self.handler.add_subparsers()
-        for method, command, options, help in self.registry.command_methods:
+        for command_info in self.command_methods:
+            command, options = command_info['args']
+            help = command_info['kwargs']['help']
             subparser = subparsers.add_parser(
                 command, allow_help=True, line_handler=self, help=help
             )
-            subparser.set_defaults(_command_method=method)
+            subparser.set_defaults(_command_method=command_info['method'])
             for option in options:
                 if isinstance(option, str):
                     option = (option,)
@@ -168,7 +191,7 @@ class ExitLineHandler(ExactLineHandler):
     """Exits the context when an 'exit' command is received."""
     registry = ExactLineHandler.Registry()
 
-    @registry.bind('exit')
+    @bind_command('exit')
     def exit(self):
         self.context.write('Bye!\n')
         self.context.exit()
@@ -185,6 +208,6 @@ class EchoLineHandler(RegexLineHandler):
     """Imitates the 'echo' shell command."""
     registry = RegexLineHandler.Registry()
 
-    @registry.bind(r'^echo (?P<what>.*)\n?')
+    @bind_command(r'^echo (?P<what>.*)\n?')
     def echo(self, what):
         self.context.write('{0}\n'.format(what))
