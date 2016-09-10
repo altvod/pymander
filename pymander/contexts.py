@@ -156,46 +156,8 @@ class StandardPrompt(CommandContext):
 
 
 class PrebuiltCommandContext(CommandContext):
-    class Registry:
-        def __init__(self):
-            self.bound_handler_classes = {}
-
-        def bind_to_handler(self, handler_cls, *bind_args):
-            """Bind the context's method to a LineParser class with a nested Registry class."""
-            def decorator(method):
-                own_cls_name = self.__class__.__name__
-                handler_cls_name = handler_cls.__name__
-                # add handler class to self.bound_handler_classes not yet added
-                if handler_cls_name not in self.bound_handler_classes:
-                    self.bound_handler_classes[handler_cls_name] = type(
-                        '{0}.reg_{1}'.format(own_cls_name, handler_cls_name), (handler_cls,), {}
-                    )
-                    self.bound_handler_classes[handler_cls_name].registry = handler_cls.Registry()
-
-                def redirect_method(handler_self, *args, **kwargs):
-                    return method(handler_self.context, *args, **kwargs)
-
-                self.bound_handler_classes[handler_cls_name].registry.bind(*bind_args)(redirect_method)
-
-            return decorator
-
-        def bind_exact(self, *bind_args):
-            return self.bind_to_handler(ExactLineHandler, *bind_args)
-
-        def bind_regex(self, *bind_args):
-            return self.bind_to_handler(RegexLineHandler, *bind_args)
-
-        def bind_argparse(self, *bind_args):
-            return self.bind_to_handler(ArgparseLineHandler, *bind_args)
-
-    registry = Registry()
 
     def __init__(self, handlers=None, name=''):
-        handlers = copy.copy(handlers) or []
-        handlers = handlers + [
-            handler_class() for handler_class in self.registry.bound_handler_classes.values()
-        ]
-
         self._handler_class_arg_sets = {}
         methods = inspect.getmembers(self.__class__, predicate=inspect.isfunction)
         for method_tuple in methods:
@@ -219,7 +181,7 @@ class PrebuiltCommandContext(CommandContext):
                 handler_method_name = 'generated_method_{}'.format(uuid.uuid4().hex)
                 self._handler_class_arg_sets[handler_class_name][2][handler_method_name] = redirect_method
 
-        handlers = handlers + [
+        handlers = copy.copy(handlers) or [] + [
             type(*handler_class_args)() for handler_class_args in self._handler_class_arg_sets.values()
         ]
 

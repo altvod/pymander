@@ -38,25 +38,6 @@ class LineHandler(metaclass=abc.ABCMeta):
 class RegexLineHandler(LineHandler):
     """Interprets commands via matching to regular expressions."""
 
-    class Registry:
-        def __init__(self):
-            self.command_methods = []
-
-        def bind(self, expr):
-            def decorator(method):
-                self.command_methods.append(
-                    {'method': method, 'args': (expr,), 'kwargs': {}}
-                )
-                return method
-
-            return decorator
-
-    registry = Registry()
-
-    def __init__(self):
-        super().__init__()
-        self.command_methods += self.registry.command_methods
-
     def try_execute(self, line):
         for command_info in self.command_methods:
             expr = command_info['args'][0]
@@ -69,25 +50,6 @@ class RegexLineHandler(LineHandler):
 
 class ExactLineHandler(LineHandler):
     """Matches line to exact expressions."""
-
-    class Registry:
-        def __init__(self):
-            self.command_methods = []
-
-        def bind(self, expr):
-            def decorator(method):
-                self.command_methods.append(
-                    {'method': method, 'args': (expr,), 'kwargs': {}}
-                )
-                return method
-
-            return decorator
-
-    registry = Registry()
-
-    def __init__(self):
-        super().__init__()
-        self.command_methods += self.registry.command_methods
 
     def try_execute(self, line):
         for command_info in self.command_methods:
@@ -130,26 +92,8 @@ class ArgparseLineHandler(LineHandler):
     """Interprets commands via the standard argparse tool."""
     common_options = {}
 
-    class Registry:
-        def __init__(self):
-            self.command_methods = []
-
-        def bind(self, command, options=None, help=''):
-            options = options or ()
-
-            def decorator(method):
-                self.command_methods.append(
-                    {'method': method, 'args': (command, options), 'kwargs': {'help': help}}
-                )
-                return method
-
-            return decorator
-
-    registry = Registry()
-
     def __init__(self):
         super().__init__()
-        self.command_methods += self.registry.command_methods
 
         self.handler = ArgumentParserWrapper(prog='')
         for option, option_args in self.common_options.items():

@@ -12,8 +12,6 @@ __all__ = (
 
 class ExitLineHandler(ExactLineHandler):
     """Exits the context when an 'exit' command is received."""
-    registry = ExactLineHandler.Registry()
-
     @decorators.bind_command('exit')
     def exit(self):
         self.context.write('Bye!\n')
@@ -29,8 +27,6 @@ class EmptyLineHandler(LineHandler):
 
 class EchoLineHandler(RegexLineHandler):
     """Imitates the 'echo' shell command."""
-    registry = RegexLineHandler.Registry()
-
     @decorators.bind_command(r'^echo (?P<what>.*)\n?')
     def echo(self, what):
         self.context.write('{0}\n'.format(what))
