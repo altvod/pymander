@@ -3,12 +3,11 @@ import json
 from pymander.handlers import ArgparseLineHandler
 from pymander.contexts import JsonContext, StandardPrompt
 from pymander.commander import Commander
+from pymander.decorators import bind_command
 
 
 class StarTrekLineHandler(ArgparseLineHandler):
-    registry = ArgparseLineHandler.Registry()
-
-    @registry.bind('boldly_read', [
+    @bind_command('boldly_read', [
         ['--format', '-f', {'dest': 'text_format', 'default': 'plain'}]
     ])
     def boldly_read(self, text_format):

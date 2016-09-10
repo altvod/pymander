@@ -3,6 +3,7 @@ from unittest import TestCase
 from pymander.exceptions import ExitContext, CantParseLine
 from pymander.handlers import ExitLineHandler, EchoLineHandler, EmptyLineHandler, \
     ExactLineHandler, RegexLineHandler, ArgparseLineHandler
+from pymander.decorators import bind_command
 
 
 class FakeContext:
@@ -67,9 +68,7 @@ class EmptyLineHandlerCase(SimpleLineHandlerCase):
 
 class ExactLineHandlerCase(SimpleLineHandlerCase):
     class TestExactLineHandler(ExactLineHandler):
-        registry = ExactLineHandler.Registry()
-
-        @registry.bind('do this')
+        @bind_command('do this')
         def do_this(self):
             self.context.write('This is done')
 
@@ -86,13 +85,11 @@ class ExactLineHandlerCase(SimpleLineHandlerCase):
 
 class RegexLineHandlerCase(SimpleLineHandlerCase):
     class TestRegexLineHandler(RegexLineHandler):
-        registry = RegexLineHandler.Registry()
-
-        @registry.bind('go to warp (?P<warp_factor>\d(\.\d+))')
+        @bind_command('go to warp (?P<warp_factor>\d(\.\d+))')
         def go_to_warp(self, warp_factor):
             self.context.write('At warp {0}'.format(warp_factor))
 
-        @registry.bind('(?P<action>raise|drop) shields')
+        @bind_command('(?P<action>raise|drop) shields')
         def manage_shields(self, action):
             self.context.write('Shields {0}'.format('raised' if action == 'raise' else 'dropped'))
 
@@ -119,9 +116,7 @@ class RegexLineHandlerCase(SimpleLineHandlerCase):
 
 class ArgparseLineHandlerCase(SimpleLineHandlerCase):
     class TestArgparseLineHandler(ArgparseLineHandler):
-        registry = ArgparseLineHandler.Registry()
-
-        @registry.bind('do', [['what'], ['--joy', {'action': 'store_true'}]])
+        @bind_command('do', [['what'], ['--joy', {'action': 'store_true'}]])
         def do(self, what, joy):
             self.context.write('Doing {0}{1}'.format(what, ' with joy' if joy else ''))
 

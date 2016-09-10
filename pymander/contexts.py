@@ -1,13 +1,17 @@
 import abc
 import copy
+import inspect
 import json
+import uuid
 
 from .exceptions import CantParseLine, ExitContext
 from .handlers import LineHandler, EmptyLineHandler, EchoLineHandler, ExitLineHandler, \
     ExactLineHandler, ArgparseLineHandler, RegexLineHandler
 
 
-__all__ = ['CommandContext', 'MultiLineContext', 'JsonContext', 'StandardPrompt', 'PrebuiltCommandContext']
+__all__ = (
+    'CommandContext', 'MultiLineContext', 'JsonContext', 'StandardPrompt', 'PrebuiltCommandContext'
+)
 
 
 class CommandContext(metaclass=abc.ABCMeta):
@@ -164,7 +168,7 @@ class PrebuiltCommandContext(CommandContext):
                 # add handler class to self.bound_handler_classes not yet added
                 if handler_cls_name not in self.bound_handler_classes:
                     self.bound_handler_classes[handler_cls_name] = type(
-                        '{0}.{1}'.format(own_cls_name, handler_cls_name), (handler_cls,), {}
+                        '{0}.reg_{1}'.format(own_cls_name, handler_cls_name), (handler_cls,), {}
                     )
                     self.bound_handler_classes[handler_cls_name].registry = handler_cls.Registry()
 
@@ -191,4 +195,32 @@ class PrebuiltCommandContext(CommandContext):
         handlers = handlers + [
             handler_class() for handler_class in self.registry.bound_handler_classes.values()
         ]
+
+        self._handler_class_arg_sets = {}
+        methods = inspect.getmembers(self.__class__, predicate=inspect.isfunction)
+        for method_tuple in methods:
+            method = method_tuple[1]
+            if getattr(method, '_bound_command', False):
+                handler_class = method._handler_class
+                handler_class_name = handler_class.__name__
+                if handler_class_name not in self._handler_class_arg_sets:
+                    self._handler_class_arg_sets[handler_class_name] = [
+                        '{0}.{1}'.format(self.__class__, handler_class_name), (handler_class,), {}
+                    ]
+
+                redirect_method = (
+                    lambda local_method: lambda handler_self, *args, **kwargs:
+                    local_method(handler_self.context, *args, **kwargs)
+                )(method)
+                redirect_method._bound_command = True
+                redirect_method._args = method._args
+                redirect_method._kwargs = method._kwargs
+
+                handler_method_name = 'generated_method_{}'.format(uuid.uuid4().hex)
+                self._handler_class_arg_sets[handler_class_name][2][handler_method_name] = redirect_method
+
+        handlers = handlers + [
+            type(*handler_class_args)() for handler_class_args in self._handler_class_arg_sets.values()
+        ]
+
         super().__init__(handlers=handlers, name=name)

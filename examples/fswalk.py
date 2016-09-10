@@ -2,6 +2,7 @@ import os
 
 from pymander.contexts import PrebuiltCommandContext, MultiLineContext, StandardPrompt
 from pymander.shortcuts import run_with_context
+from pymander.decorators import bind_argparse, bind_regex
 
 
 class FileWriterContext(MultiLineContext):
@@ -24,13 +25,11 @@ class FileWriterContext(MultiLineContext):
 
 
 class FsContext(PrebuiltCommandContext, StandardPrompt):
-    registry = PrebuiltCommandContext.Registry()
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.current_dir = os.path.abspath('.')
 
-    @registry.bind_argparse('cd', ['dirname'])
+    @bind_argparse('cd', ['dirname'])
     def cd(self, dirname):
         full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
         if not os.path.exists(full_dirname):
@@ -39,7 +38,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
 
         self.current_dir = full_dirname
 
-    @registry.bind_regex('^ls(\s+(?P<dirname>\w+))?')
+    @bind_regex('^ls(\s+(?P<dirname>\w+))?')
     def ls(self, dirname):
         if dirname:
             full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
@@ -56,7 +55,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
 
         self.write('{0}\n'.format('\n'.join(sorted(os.listdir(full_dirname)))))
 
-    @registry.bind_argparse('mkdir', ['dirname'])
+    @bind_argparse('mkdir', ['dirname'])
     def mkdir(self, dirname):
         if not os.path.exists(self.current_dir):
             self.write('No such dir: {0}\n'.format(dirname))
@@ -65,7 +64,7 @@ class FsContext(PrebuiltCommandContext, StandardPrompt):
         full_dirname = os.path.abspath(os.path.join(self.current_dir, dirname))
         os.mkdir(full_dirname)
 
-    @registry.bind_argparse('new', ['filename'])
+    @bind_argparse('new', ['filename'])
     def new(self, filename):
         if not os.path.exists(self.current_dir):
             self.write('No such dir: {0}\n'.format(filename))

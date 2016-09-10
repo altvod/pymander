@@ -1,4 +1,4 @@
-__all__ = ['CantParseLine', 'SkipExecution', 'ExitContext', 'ExitMainloop']
+__all__ = ('CantParseLine', 'SkipExecution', 'ExitContext', 'ExitMainloop')
 
 
 class CantParseLine(Exception):

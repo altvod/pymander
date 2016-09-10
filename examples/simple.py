@@ -2,6 +2,7 @@ from pymander.exceptions import CantParseLine
 from pymander.handlers import LineHandler, RegexLineHandler, ArgparseLineHandler
 from pymander.contexts import StandardPrompt
 from pymander.commander import Commander
+from pymander.decorators import bind_argparse, bind_regex
 
 
 class DeeperLineHandler(LineHandler):
@@ -25,28 +26,24 @@ class RaynorLineHandler(LineHandler):
 
 
 class BerryLineHandler(RegexLineHandler):
-    registry = RegexLineHandler.Registry()
-
-    @registry.bind(r'pick a (?P<berry_kind>\w+)')
+    @bind_regex(r'pick a (?P<berry_kind>\w+)')
     def pick_berry(self, berry_kind):
         self.context.write('Picked a {0}\n'.format(berry_kind))
 
-    @registry.bind(r'make (?P<berry_kind>\w+) jam')
+    @bind_regex(r'make (?P<berry_kind>\w+) jam')
     def make_jam(self, berry_kind):
         self.context.write('Made some {0} jam\n'.format(berry_kind))
 
 
 class GameLineHandler(ArgparseLineHandler):
-    registry = ArgparseLineHandler.Registry()
-
-    @registry.bind('play', [
+    @bind_argparse('play', [
         ['game', {'type': str, 'default': 'nothing'}],
         ['--well', {'action': 'store_true'}],
     ])
     def play(self, game, well):
         self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
 
-    @registry.bind('win')
+    @bind_argparse('win')
     def win(self):
         self.context.write('I just won!\n')
 
