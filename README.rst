@@ -228,14 +228,6 @@ via the ``self.command_methods`` attribute:
 .. code-block:: python
 
     class MyLineHandler(LineHandler):
-        class Registry:
-            @classmethod
-            def bind(cls, *args):
-                def decorator(method):
-                    # register it to cls somehow...
-                    return method
-                return decorator
-        
         def try_execute(self, line):
             for command_info in self.command_methods:
                 # where: command_info = {"method": <callable>, "args": <bind_args>, "kwargs": <bind_kwargs>}
@@ -244,7 +236,7 @@ via the ``self.command_methods`` attribute:
                 #     and call the callable if it does
                 pass
 
-            # if so suitable match was found:
+            # if no suitable match was found:
             raise CantParseLine
 
 
