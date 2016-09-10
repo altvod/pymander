@@ -11,7 +11,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='pymander',
 
-    version='0.1.3',
+    version='0.2.0',
 
     description='An interactive console application library for Python',
     long_description=long_description,
