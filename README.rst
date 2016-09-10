@@ -4,12 +4,14 @@ PyMander
 Introduction
 ------------
 
-PyMander (short for Python Commander) is a library for writing interactive command-line interface (CLI) applications in Python.
+PyMander (short for Python Commander) is a library for writing interactive command-line interface (CLI)
+applications in Python.
 
 Quick Start
 -----------
 
-Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that print the current date and time respectively. Then you would do something like this:
+Let's say, we need a CLI app that has two commands: ``date`` and ``time`` that print the current date
+and time respectively. Then you would do something like this:
 
 .. code-block:: python
 
@@ -42,7 +44,9 @@ And you'll get... (just type ``exit`` to exit the loop)
     Bye!
 
 
-Let's spice things up and add some time travel functionality to your app. Adding a lot of commands to the same function as if-blocks is not a very good idea, besides you might want to keep warping of the Universe separate from the code that just shows the date and time, so go ahead and create a new handler:
+Let's spice things up and add some time travel functionality to your app. Adding a lot of commands
+to the same function as if-blocks is not a very good idea, besides you might want to keep warping of the Universe
+separate from the code that just shows the date and time, so go ahead and create a new handler:
 
 .. code-block:: python
 
@@ -59,7 +63,8 @@ Let's spice things up and add some time travel functionality to your app. Adding
 
 At this point we have a problem: how do we use the two handlers in our app  simultaneously?
 
-Command contexts are a way of combining several handlers in a single scope so that they can work together. Having said that, let's run it using a ``StandardPrompt`` command context:
+Command contexts are a way of combining several handlers in a single scope so that they can work together.
+Having said that, let's run it using a ``StandardPrompt`` command context:
 
 .. code-block:: python
 
@@ -83,7 +88,8 @@ And back to the future we go!
     Traveling to date: October 10 2058
 
 
-It's worth mentioning that ``run_with_handler(handler)`` is basically a shortcut for ``run_with_context(StandardPrompt([handler]))``.
+It's worth mentioning that ``run_with_handler(handler)`` is basically a shortcut
+for ``run_with_context(StandardPrompt([handler]))``.
 
 ``StandardPrompt`` is a simple command context that includes the following features:
 
@@ -105,15 +111,14 @@ Example:
 
 .. code-block:: python
 
-    class BerryLineHandler(RegexLineHandler):
-        class Registry(RegexLineHandler.Registry):
-            pass
+    from pymander.decorators import bind_command
 
-        @Registry.bind(r'pick a (?P<berry_kind>\w+)')
+    class BerryLineHandler(RegexLineHandler):
+        @bind_command(r'pick a (?P<berry_kind>\w+)')
         def pick_berry(self, berry_kind):
             self.context.write('Picked a {0}\n'.format(berry_kind))
 
-        @Registry.bind(r'make (?P<berry_kind>\w+) jam')
+        @bind_command(r'make (?P<berry_kind>\w+) jam')
         def make_jam(self, berry_kind):
             self.context.write('Made some {0} jam\n'.format(berry_kind))
 
@@ -135,18 +140,17 @@ Example:
 
 .. code-block:: python
 
-    class GameLineHandler(ArgparseLineHandler):
-        class Registry(ArgparseLineHandler.Registry):
-            pass
+    from pymander.decorators import bind_command
 
-        @Registry.bind('play', [
+    class GameLineHandler(ArgparseLineHandler):
+        @bind_command('play', [
             ['game', {'type': str, 'default': 'nothing'}],
             ['--well', {'action': 'store_true'}],
         ])
         def play(self, game, well):
             self.context.write('I play {0}{1}\n'.format(game, ' very well' if well else ''))
 
-        @Registry.bind('win')
+        @bind_command('win')
         def win(self):
             self.context.write('I just won!\n')
 
@@ -167,24 +171,24 @@ Output:
 
 **Combining argparse and regexes using PrebuiltCommandContext**
 
-Sometimes you might find it useful to be able to use both approaches together or be able to switch from one to another without making a mess of a whole bunch of handlers.
+Sometimes you might find it useful to be able to use both approaches together or be able to switch
+from one to another without making a mess of a whole bunch of handlers.
 
-``PrebuiltCommandContext`` allows you to use decorators to assign its own methods as either argparse or regex commands in a single (command context) class without having to define the handlers yourself:
+``PrebuiltCommandContext`` allows you to use decorators to assign its own methods
+as either argparse or regex commands in a single (command context) class without having to define the handlers yourself:
 
 .. code-block:: python
 
     from pymander.contexts import PrebuiltCommandContext, StandardPrompt
     from pymander.shortcuts import run_with_context
-    
-    class SaladContext(PrebuiltCommandContext, StandardPrompt):
-        class Registry(PrebuiltCommandContext.Registry):
-            pass
+    from pymander.decorators import bind_argparse, bind_regex
 
-        @Registry.bind_regex(r'(?P<do_what>eat|cook) caesar')
+    class SaladContext(PrebuiltCommandContext, StandardPrompt):
+        @bind_regex(r'(?P<do_what>eat|cook) caesar')
         def caesar_salad(self, do_what):
             self.write('{0}ing caesar salad...\n'.format(do_what.capitalize()))
 
-        @Registry.bind_argparse('buy', [
+        @bind_argparse('buy', [
             'kind_of_salad',
             ['--price', '-p', {'default': None}]
         ])
@@ -208,7 +212,7 @@ Example:
     Buying russian salad for $5...
 
 
-The ``PrebuiltCommandContext.Registry`` class includes for decorators for assigning methods to specific handlers:
+The ``PrebuiltCommandContext`` class can be used with three decorators for assigning methods to specific handlers:
 
 - ``bind_exact(command)`` binds to ``ExactLineHandler`` (matches the line exactly to the specified string, e.g. the ``exit`` command)
 - ``bind_argparse(command, options)`` binds to ``ArgparseLineHandler`` (uses argparse to evaluate the line)
@@ -216,9 +220,10 @@ The ``PrebuiltCommandContext.Registry`` class includes for decorators for assign
 
 and one generic decorator:
 
-- ``bind_to_handler(handler_class, *args)``
+- ``bind_to_handler(handler_class, *bind_args, **bind_kwargs)``
 
-binds to any given LineHandler subclass with one requirement: it must have a nested ``Registry`` class with classmethod ``bind`` (ideally a parameterized decorator). Like this:
+binds to any given LineHandler subclass. The handler class can then access its autogenerated methods
+via the ``self.command_methods`` attribute:
 
 .. code-block:: python
 
@@ -232,9 +237,15 @@ binds to any given LineHandler subclass with one requirement: it must have a nes
                 return decorator
         
         def try_execute(self, line):
-            # go over registered methods in self.Registry, choose one and call it
-            # otherwise raise CantParseLine
-            pass
+            for command_info in self.command_methods:
+                # where: command_info = {"method": <callable>, "args": <bind_args>, "kwargs": <bind_kwargs>}
+                # your logic goes here:
+                #     determine whether <line> matches the <args> and <kwargs> options)
+                #     and call the callable if it does
+                pass
+
+            # if so suitable match was found:
+            raise CantParseLine
 
 
 And then use it like this:
@@ -242,20 +253,24 @@ And then use it like this:
 .. code-block:: python
 
     class MyPrebuiltContext(PrebuiltCommandContext, StandardPrompt):
-        class Registry(PrebuiltCommandContext.Registry):
-            pass
-
-        @Registry.bind_to_handler(MyLineHandler, 'some', 'arguments')
+        @bind_to_handler(MyLineHandler, 'some', 'arguments')
         def do_whatever(self, *your_method_args):
-            self.write('Whaterver, bro\n')
+            self.write('Whatever, bro\n')
 
 
-At this point you might be wondering, why we always also use ``StandardPrompt`` when inheriting from ``PrebuiltCommandContext``. That's because ``PrebuiltCommandContext`` is an abstract class and does not implement some of the required ``CommandContext`` methods. So this is where I'd normally send you to the full documentation of the project, but it's not finished yet, so, for now, you can just browse the source code of the examples and the ``pymander`` package itself :)
+At this point you might be wondering, why we always also use ``StandardPrompt`` when inheriting
+from ``PrebuiltCommandContext``. That's because ``PrebuiltCommandContext`` is an abstract class and does not
+implement some of the required ``CommandContext`` methods. So this is where I'd normally send you
+to the full documentation of the project, but it's not finished yet, so, for now, you can just browse
+the source code of the examples and the ``pymander`` package itself :)
 
 Using Nested Contexts
 ---------------------
 
-An obvous extension would be the ability to enter a new context on some commands and then exit them (multi-step commands, entering and exiting a file editor, etc.). All you have to do to use this is return an instance of a new ``CommandContext`` from your command, and you're in! Just don't forget to supply this context with an ``exit``, or you'll be stuck in there forever.
+An obvious extension would be the ability to enter a new context on some commands and then exit them
+(multi-step commands, entering and exiting a file editor, etc.).
+All you have to do to use this is return an instance of a new ``CommandContext`` from your command,
+and you're in! Just don't forget to supply this context with an ``exit``, or you'll be stuck in there forever.
 
 See ``DeeperLineHandler`` in the `simple <https://github.com/altvod/pymander/blob/master/examples/simple.py>`_ example.
 
